@@ -21,8 +21,8 @@ It is designed to:
 
 Verified working with:
 
-- WeChat `4.1.8`
-- WMPF `19481`
+- WeChat `4.1.9.35`
+- WMPF `19823`
 
 ![Version Preview](docs/images/version.png)
 
@@ -37,19 +37,54 @@ The official WeChat installer is **not** distributed with this repository.
 - `python main.py --check` to verify whether the current runtime is supported
 - `python main.py -x` to start miniapp debugging
 - automatic handling for WMPF runtime reconnects
-- current verified support for the latest tested `4.1.8 / 19481` runtime path
+- current verified support for the latest tested `4.1.9.35 / 19823` runtime path
 
 ## Requirements
 
-- Windows
-- Python 3.10+
+- 64-bit Windows
+- Python 3.10+ (64-bit CPython; do not use Python 3.8 or older)
 - Node.js
 - A runnable WeChat miniapp window
 
-Install Python dependencies:
+Recommended PowerShell setup:
 
-```bash
-pip install -r requirements.txt
+```powershell
+py -3 -c "import sys, platform; print(sys.version); print(platform.architecture()[0])"
+py -3 -m venv .venv
+.\.venv\Scripts\python -m pip install -U pip
+.\.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+If the first command does not print Python 3.10+ and `64bit`, install 64-bit Python 3.10+ first, then recreate the virtual environment.
+
+If you are already inside a virtual environment, still prefer:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Do not rely on the global `pip` command; on Windows it may point to an older Python installation.
+
+If installation fails with:
+
+```text
+No matching distribution found for pyfiglet==1.0.2
+```
+
+you are usually using an unsupported Python version. Check:
+
+```powershell
+python -c "import sys, platform; print(sys.version); print(platform.architecture()[0])"
+where python
+where pip
+```
+
+Make sure the active interpreter is Python 3.10+ and `64bit`. If `frida` downloads a `.tar.gz` source package instead of a `win_amd64.whl`, you are also likely using 32-bit or otherwise mismatched Python. Install 64-bit Python 3.10+, recreate the virtual environment, then reinstall.
+
+If Python is correct but your package mirror is missing files, use official PyPI once:
+
+```powershell
+.\.venv\Scripts\python -m pip install -r requirements.txt -i https://pypi.org/simple
 ```
 
 ## Quick Start
@@ -63,7 +98,7 @@ python main.py --check
 Example output:
 
 ```text
-当前 WMPF 版本 19481：支持
+当前 WMPF 版本 19823：支持
 ```
 
 ### Step 2. Start the local debugging bridge
@@ -121,10 +156,18 @@ If ports `9421` or `62000` are already occupied, close the old bridge process fi
   Check whether the currently running runtime is supported.
 - `python main.py -x`
   Start the miniapp debugging flow.
+- `python main.py -x --debug`
+  Start with verbose Frida and bridge output (useful for diagnosing new WMPF versions).
 - `python main.py -c`
   Start the embedded browser debugging flow.
 - `python main.py -all`
   Run both startup flows.
+
+## Network Panel Shows Only a Few Requests
+
+The DevTools network panel only captures requests made **after** the debugger connects. Requests that completed before the connection (images, CSS, JS loaded on startup) will not appear.
+
+To capture all requests from the beginning, follow the recommended order: start the script first, then open the miniapp in WeChat.
 
 ## Support Model
 

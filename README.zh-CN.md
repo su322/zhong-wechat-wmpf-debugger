@@ -20,8 +20,8 @@
 
 当前已验证支持：
 
-- 微信 `4.1.8`
-- WMPF `19481`
+- 微信 `4.1.9.35`
+- WMPF `19823`
 ![预览](docs/images/version.png)
 
 官方下载入口：
@@ -38,19 +38,54 @@
 - `python main.py --check` 一行判断当前版本是否支持
 - `python main.py -x` 一键启动小程序调试
 - 已处理新版 WMPF 运行时的重连恢复问题
-- 当前已验证支持最新测试版本 `4.1.8 / 19481`
+- 当前已验证支持最新测试版本 `4.1.9.35 / 19823`
 
 ## 环境要求
 
-- Windows
-- Python 3.10+
+- Windows 64 位
+- Python 3.10+（必须使用 64 位 CPython，不要使用 Python 3.8 或更低版本）
 - Node.js
 - 已经能正常打开微信小程序
 
-安装 Python 依赖：
+建议在 Windows PowerShell 中这样安装 Python 依赖，避免 `pip` 指向旧 Python：
 
-```bash
-pip install -r requirements.txt
+```powershell
+py -3 -c "import sys, platform; print(sys.version); print(platform.architecture()[0])"
+py -3 -m venv .venv
+.\.venv\Scripts\python -m pip install -U pip
+.\.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+如果第一行输出不是 Python 3.10+ 和 `64bit`，先安装 64 位 Python 3.10+，再重新创建虚拟环境。
+
+如果你已经在虚拟环境里，也请优先使用：
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+不要直接依赖全局的 `pip` 命令；它可能绑定到旧版 Python。
+
+如果安装时报：
+
+```text
+No matching distribution found for pyfiglet==1.0.2
+```
+
+通常是当前 Python 版本低于要求。先检查：
+
+```powershell
+python -c "import sys, platform; print(sys.version); print(platform.architecture()[0])"
+where python
+where pip
+```
+
+确认输出是 Python 3.10+ 且 `64bit`。如果 `frida` 下载的是 `.tar.gz` 源码包而不是 `win_amd64.whl`，也通常说明你正在使用 32 位或不匹配的 Python。安装 64 位 Python 3.10+ 后重新创建虚拟环境再安装。
+
+如果确认 Python 没问题但镜像源缺包，可以临时使用官方 PyPI：
+
+```powershell
+.\.venv\Scripts\python -m pip install -r requirements.txt -i https://pypi.org/simple
 ```
 
 ## 快速开始
@@ -64,7 +99,7 @@ python main.py --check
 示例输出：
 
 ```text
-当前 WMPF 版本 19481：支持
+当前 WMPF 版本 19823：支持
 ```
 
 ### 第 2 步：启动调试脚本
@@ -137,10 +172,18 @@ devtools://devtools/bundled/inspector.html?ws=127.0.0.1:62000
   检查当前微信运行时是否已内置支持
 - `python main.py -x`
   启动小程序调试流程
+- `python main.py -x --debug`
+  启动并输出详细调试日志（Frida hook 输出 + 桥接日志，适合排查新 WMPF 版本问题）
 - `python main.py -c`
   启动内置浏览器调试流程
 - `python main.py -all`
   同时执行两种流程
+
+## 网络面板只显示少量请求
+
+DevTools 网络面板只能捕获**调试器连接之后**发出的请求。连接前已经完成的图片、CSS、JS 加载不会出现在面板里。
+
+要捕获完整请求，请严格按推荐顺序操作：先启动脚本，再打开微信里的小程序。
 
 ## 支持机制说明
 

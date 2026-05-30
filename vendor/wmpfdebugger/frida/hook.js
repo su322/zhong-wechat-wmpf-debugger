@@ -34,21 +34,46 @@ const patchCDPFilter = (base, config) => {
     });
 };
 
-const hookOnLoadScene = (a1, sceneOffsets) => {
-    const miniappConfigPtr = a1
-        .add(56)
-        .readPointer()
-        .add(sceneOffsets[0])
-        .readPointer();
-    const miniappScenePtr = miniappConfigPtr
-        .add(8)
-        .readPointer()
-        .add(sceneOffsets[1])
-        .readPointer()
-        .add(16)
-        .readPointer()
-        .add(sceneOffsets[2]);
-    send(`[hook] scene: ${miniappScenePtr.readInt()}`);
+const safeReadPointer = (ptr) => {
+    if (!ptr || ptr.isNull()) return null;
+    try {
+        const range = Process.findRangeByAddress(ptr);
+        if (!range || !range.protection.includes('r')) return null;
+        const result = ptr.readPointer();
+        return result.isNull() ? null : result;
+    } catch(e) {
+        return null;
+    }
+};
+
+const hookOnLoadScene = (a1, config) => {
+    const sceneOffsets = config.SceneOffsets;
+    const baseOffset = typeof config.SceneBaseOffset === "number" ? config.SceneBaseOffset : 56;
+
+    const ptr1 = safeReadPointer(a1.add(baseOffset));
+    if (!ptr1) { send(`[hook] scene chain: null at this+${baseOffset}`); return; }
+
+    const ptr2 = safeReadPointer(ptr1.add(sceneOffsets[0]));
+    if (!ptr2) { send(`[hook] scene chain: null at ptr1+${sceneOffsets[0]}`); return; }
+
+    const ptr3 = safeReadPointer(ptr2.add(8));
+    if (!ptr3) { send(`[hook] scene chain: null at ptr2+8`); return; }
+
+    const ptr4 = safeReadPointer(ptr3.add(sceneOffsets[1]));
+    if (!ptr4) { send(`[hook] scene chain: null at ptr3+${sceneOffsets[1]}`); return; }
+
+    const ptr5 = safeReadPointer(ptr4.add(16));
+    if (!ptr5) { send(`[hook] scene chain: null at ptr4+16`); return; }
+
+    const miniappScenePtr = ptr5.add(sceneOffsets[2]);
+    const range = Process.findRangeByAddress(miniappScenePtr);
+    if (!range || !range.protection.includes('r')) {
+        send(`[hook] scene chain: unmapped at ptr5+${sceneOffsets[2]}`);
+        return;
+    }
+
+    const sceneValue = miniappScenePtr.readInt();
+    send(`[hook] scene: ${sceneValue}`);
 
     // 1000: from issue #83 <-- will crash the process
     // 1007: from issue #80
@@ -67,7 +92,7 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
         1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1178, 1256, 1260, 1302,
         1308,
     ];
-    if (!sceneNumberArray.includes(miniappScenePtr.readInt())) {
+    if (!sceneNumberArray.includes(sceneValue)) {
         return;
     }
     send("[hook] hook scene condition -> 1101");
@@ -92,7 +117,7 @@ const patchOnLoadStart = (base, config) => {
                 this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
             }
             // handle onLoad scene
-            hookOnLoadScene(this.context.rcx, config.SceneOffsets);
+            hookOnLoadScene(this.context.rcx, config);
         },
         onLeave(retval) {
             // do nothing

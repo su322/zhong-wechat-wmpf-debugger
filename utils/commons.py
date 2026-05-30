@@ -16,6 +16,16 @@ def choose_debug_mode(runtime):
     return runtime["mode"]
 
 
+def build_h5_debug_spawn_argv(path):
+    return [
+        path,
+        "--xweb-enable-inspect=1",
+        "--remote-debugging-port=9222",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-allow-origins=*",
+    ]
+
+
 class Commons:
     def __init__(self):
         self.wechatutils_instance = WechatUtils()
@@ -47,13 +57,16 @@ class Commons:
 
     def inject_wechatDLL(self, path, code):
         device = self.get_local_device()
-        pid = device.spawn(path)
+        pid = device.spawn(build_h5_debug_spawn_argv(path))
         session = frida.attach(pid)
         script = session.create_script(code)
         script.on("message", self.onMessage)
         script.load()
         device.resume(pid)
-        time.sleep(10)
+        print(Color.GREEN + "[+] 微信已启动，Hook 保持中。" + Color.END)
+        print(Color.GREEN + "[+] 请现在在 PC 微信内打开目标 H5/公众号页面。" + Color.END)
+        print(Color.GREEN + "[+] F12 不一定会生效；打开页面后请访问 http://127.0.0.1:9222/json/list 检查 DevTools 目标。" + Color.END)
+        input("打开页面并观察后，按 Enter 结束 Hook 并继续诊断...")
         session.detach()
 
     def stream_bridge_output(self, process):
@@ -75,7 +88,7 @@ class Commons:
             if return_code not in (None, 0):
                 print(Color.RED + f"[-] WMPF debug bridge exited with code {return_code}" + Color.END)
 
-    def load_wmpf_runtime(self, runtime):
+    def load_wmpf_runtime(self, runtime, debug_main=False, debug_frida=False):
         version = runtime["version"]
         client_version = runtime.get("client_version")
         if client_version:
@@ -93,6 +106,8 @@ class Commons:
             cdp_port=DEFAULT_CDP_PORT,
             runtime_pid=runtime["pid"],
             runtime_version=runtime["version"],
+            debug_main=debug_main,
+            debug_frida=debug_frida,
         )
         print(Color.GREEN + f"[+] DevTools URL: {devtools_link(DEFAULT_CDP_PORT)}" + Color.END)
         print(Color.GREEN + "[+] Launch the miniapp first, then open the DevTools URL above." + Color.END)
@@ -129,7 +144,7 @@ class Commons:
             time.sleep(5)
         return True
 
-    def load_wechatEx_configs(self):
+    def load_wechatEx_configs(self, debug_main=False, debug_frida=False):
         if get_cpu_architecture() == "MacOS x64":
             wechat_instances = self.wechatutils_instance.get_wechat_pids_and_versions_mac()
             if not wechat_instances:
@@ -157,7 +172,7 @@ class Commons:
         runtime = self.wechatutils_instance.get_preferred_runtime()
         if runtime:
             if choose_debug_mode(runtime) == "wmpf":
-                self.load_wmpf_runtime(runtime)
+                self.load_wmpf_runtime(runtime, debug_main=debug_main, debug_frida=debug_frida)
                 return
 
             if self.load_legacy_runtime():

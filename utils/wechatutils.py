@@ -271,6 +271,21 @@ class WechatUtils:
             + Color.END
         )
 
+    def build_wechat_executable_path(self, install_dir, existing_files=None):
+        normalized_dir = (install_dir or "").strip().strip('"')
+        candidates = ("Weixin.exe", "WeChat.exe", "HD_Weixin.exe")
+        existing_files = set(existing_files) if existing_files is not None else None
+
+        for candidate in candidates:
+            candidate_path = os.path.join(normalized_dir, candidate)
+            if existing_files is not None:
+                if candidate_path in existing_files:
+                    return candidate_path
+            elif os.path.isfile(candidate_path):
+                return candidate_path
+
+        return os.path.join(normalized_dir, "Weixin.exe")
+
     def find_installation_path(self, program_name):
         try:
             import winreg
@@ -285,7 +300,7 @@ class WechatUtils:
                     display_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
                     if program_name == display_name or display_name == "WeChat":
                         install_dir = winreg.QueryValueEx(sub_key, "InstallLocation")[0]
-                        install_location = os.path.join(install_dir, "WeChat.exe")
+                        install_location = self.build_wechat_executable_path(install_dir)
                         print(
                             Color.GREEN
                             + f"[+] 查找到{program_name}的安装路径是：{install_location}"

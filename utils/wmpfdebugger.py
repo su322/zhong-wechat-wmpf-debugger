@@ -19,6 +19,8 @@ def build_wmpf_bridge_command(
     cdp_port=DEFAULT_CDP_PORT,
     runtime_pid=None,
     runtime_version=None,
+    debug_main=False,
+    debug_frida=False,
 ):
     _ = vendor_root
     command = [
@@ -33,6 +35,10 @@ def build_wmpf_bridge_command(
         command.extend(["--pid", str(runtime_pid)])
     if runtime_version is not None:
         command.extend(["--version", str(runtime_version)])
+    if debug_main:
+        command.append("--debug-main")
+    if debug_frida:
+        command.append("--debug-frida")
     return command
 
 
@@ -89,6 +95,8 @@ def launch_wmpf_bridge(
     cdp_port=DEFAULT_CDP_PORT,
     runtime_pid=None,
     runtime_version=None,
+    debug_main=False,
+    debug_frida=False,
 ):
     vendor_root = Path(vendor_root or get_vendor_root())
     ensure_node_available()
@@ -104,6 +112,8 @@ def launch_wmpf_bridge(
         cdp_port=cdp_port,
         runtime_pid=runtime_pid,
         runtime_version=runtime_version,
+        debug_main=debug_main,
+        debug_frida=debug_frida,
     )
     return subprocess.Popen(
         command,

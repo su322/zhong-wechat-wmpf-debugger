@@ -118,6 +118,30 @@ class RuntimeDetectionTests(unittest.TestCase):
         message = self.utils.format_runtime_check_message({"detected": False})
         self.assertEqual(message, "未检测到正在运行的微信小程序运行时")
 
+    def test_normalizes_quoted_wechat_install_directory(self):
+        install_path = self.utils.build_wechat_executable_path(
+            r'"D:\Tencent\weixin"',
+            existing_files={r"D:\Tencent\weixin\Weixin.exe"},
+        )
+
+        self.assertEqual(install_path, r"D:\Tencent\weixin\Weixin.exe")
+
+    def test_prefers_weixin_exe_when_wechat_exe_is_missing(self):
+        install_path = self.utils.build_wechat_executable_path(
+            r"D:\Tencent\weixin",
+            existing_files={r"D:\Tencent\weixin\Weixin.exe"},
+        )
+
+        self.assertEqual(install_path, r"D:\Tencent\weixin\Weixin.exe")
+
+    def test_keeps_wechat_exe_for_legacy_installations(self):
+        install_path = self.utils.build_wechat_executable_path(
+            r"C:\Program Files\Tencent\WeChat",
+            existing_files={r"C:\Program Files\Tencent\WeChat\WeChat.exe"},
+        )
+
+        self.assertEqual(install_path, r"C:\Program Files\Tencent\WeChat\WeChat.exe")
+
 
 if __name__ == "__main__":
     unittest.main()
