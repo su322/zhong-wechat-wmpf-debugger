@@ -8,7 +8,7 @@ from utils.commons import Commons
 
 
 _BANNER_FILE = Path(__file__).resolve().parent / "utils" / "banner.py"
-_EXPECTED_BANNER_FILE_HASH = "f278f8a4083e6b6bdd377dd2c0afeba56c01c46d5ee0f7951536e1ea77855b5d"
+_EXPECTED_BANNER_FILE_HASH = "5a02f977a5ad5f6a72f3ac85f903cdf543372d9ac9c5a463ea2bf01d750c7190"
 _BANNER_STOP_MESSAGE = "[-] Banner信息不允许修改，已停止运行"
 
 
@@ -39,8 +39,8 @@ def print_colored_message(message, color):
 
 
 def banner_file_is_valid():
-    current_hash = hashlib.sha256(_BANNER_FILE.read_bytes()).hexdigest()
-    return current_hash == _EXPECTED_BANNER_FILE_HASH
+    content = _BANNER_FILE.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest() == _EXPECTED_BANNER_FILE_HASH
 
 
 def load_banner_generator():
