@@ -15,5 +15,4 @@ build/
 *.log
 *.out
 *.err
-vendor/wmpfdebugger/node_modules/
 WeChatWin_*.exe
