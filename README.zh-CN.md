@@ -2,6 +2,8 @@
 
 [English](README.md)
 
+**一键强开微信小程序的 F12 / DevTools 调试窗口。** 面向 Windows 桌面端微信，支持较新的 WMPF 4.x 小程序运行时，通过 Frida + 本地调试桥接，让你像在浏览器里按 F12 一样调试微信小程序，查看控制台、网络请求、页面元素等。同时保留旧版 Python/Frida 调试路径。
+
 > ## ⚠️ 下载须知（重要）
 >
 > **请到 [Releases](https://github.com/netz888/zhong-wechat-wmpf-debugger/releases) 下载打包好的 `zhong-wechat-wmpf-debugger-v*.zip`，不要直接点 “Source code (zip)”。**
