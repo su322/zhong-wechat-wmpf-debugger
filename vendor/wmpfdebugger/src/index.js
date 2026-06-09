@@ -22,6 +22,7 @@ const {
     shouldReplayForProtocolEvent,
 } = require("./replay-gate");
 const { buildReconnectResetEvents } = require("./reconnect-events");
+const { createNetworkSynthesizer } = require("./network-synth");
 
 const codex = require("./third-party/RemoteDebugCodex.js");
 const messageProto = require("./third-party/WARemoteDebugProtobuf.js");
@@ -201,6 +202,22 @@ const debug_server = (options, logger, state) => {
                 logger.main_debug("[sync] swallowed internal replay response");
                 return;
             }
+
+            // Newer WMPF runtimes only emit Network.*ExtraInfo events; the
+            // DevTools Network panel needs a primary requestWillBeSent to build
+            // each row. Synthesize the missing events from the ExtraInfo data.
+            try {
+                const payload = parseJsonMessage(unwrappedData.data.payload);
+                if (payload) {
+                    const synthesized = state.networkSynth.onMiniappCdpMessage(payload);
+                    for (const synthMessage of synthesized) {
+                        debugMessageEmitter.emit("cdpmessage", synthMessage);
+                    }
+                }
+            } catch (error) {
+                logger.main_debug(`[sync] network synth error: ${error}`);
+            }
+
             state.pendingRequests.resolve(unwrappedData.data.payload);
             debugMessageEmitter.emit("cdpmessage", unwrappedData.data.payload);
         }
@@ -414,6 +431,7 @@ const main = async () => {
         seenCdpMethods: new Set(),
         seenMiniappCategories: new Set(),
         seenNonReplayableCdpMethods: new Set(),
+        networkSynth: createNetworkSynthesizer(),
     };
     state.sessionCoordinator = createSessionCoordinator({
         logger,

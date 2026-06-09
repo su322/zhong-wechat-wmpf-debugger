@@ -10,9 +10,6 @@ const patchCDPFilter = (base, config) => {
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
-            send(
-                `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
-            );
             this.inputValue = args[0];
         },
         onLeave(retval) {
@@ -23,10 +20,6 @@ const patchCDPFilter = (base, config) => {
                 return;
             }
 
-            send(
-                `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
-                    `*(input + 8) = ${inputValue.add(8).readU32()}`,
-            );
             if (inputValue.add(8).readU32() == 6) {
                 inputValue.add(8).writeU32(0x0);
             }
