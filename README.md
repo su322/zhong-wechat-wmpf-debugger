@@ -204,6 +204,15 @@ python main.py --check
 
 ## Disclaimer
 
-This project is not affiliated with Tencent or WeChat.
-
-Use it only in environments and scenarios you are responsible for.
+- This project is provided **for personal learning and technical research only** — to study WeChat miniapp runtimes, Frida instrumentation, the Chrome DevTools Protocol (CDP), and related debugging techniques.
+- This project is **not affiliated with Tencent or WeChat** in any way. It is not an official Tencent/WeChat product and is neither endorsed nor authorized by them.
+- Users must comply with the laws and regulations of their country/region, as well as the user agreements and terms of service of WeChat and Tencent.
+- **Only use this tool on miniapps that you own or are explicitly authorized to debug.** Do not use it to debug, scrape, crack, copy, or distribute miniapps, data, or interfaces that belong to others or involve privacy or trade secrets.
+- Any use for illegal, non-compliant, or rights-infringing purposes is strictly prohibited — including but not limited to bypassing authorization, stealing data, disrupting services, or commercial exploitation.
+- Any consequences arising from the use of this project (including but not limited to violations of platform terms, infringement of third-party rights, legal liability, or data loss) are borne solely by the user and **have nothing to do with the author**.
+- This project is provided "as is", without any express or implied warranty of fitness, stability, or security.
+- **This project comes with NO technical support of any kind.** The author is under no obligation to answer any questions about installation, usage, errors, compatibility, or features. You must **test, troubleshoot, research, and figure things out entirely on your own**.
+- The author **does not provide any technical help, custom development, remote assistance, or one-on-one guidance to any individual or organization**, and does not accept assistance requests of any form.
+- Opening an issue does not guarantee that the author will address or respond to it; whether to respond is entirely at the author's discretion.
+- By using this project you affirm that you are capable of independently solving the relevant technical problems and voluntarily assume all risks of use.
+- If you do not agree with any of the above, **stop downloading, installing, and using this project immediately and delete all related files**.
