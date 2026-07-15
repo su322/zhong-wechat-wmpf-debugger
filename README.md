@@ -17,18 +17,13 @@
 
 ## 快速开始
 
-```bash
-# 1. 安装依赖
+```powershell
 pip install -r requirements.txt
-cd vendor/wmpfdebugger && npm install && cd ../..
-
-# 2. 检查 WMPF 版本是否支持
+pushd vendor\wmpfdebugger
+npm install --force
+popd
 python main.py --check
-
-# 3. 开启小程序 F12
 python main.py -x
-
-# 4. 在 Chrome/Edge 中打开输出的 devtools:// 链接
 ```
 
 ## 系统要求

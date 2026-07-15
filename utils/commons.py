@@ -74,10 +74,14 @@ class Commons:
             if process.stdout is None:
                 return
 
-            for line in iter(process.stdout.readline, ""):
-                if not line:
+            for raw_line in iter(process.stdout.buffer.readline, b""):
+                if not raw_line:
                     break
-                print(line.rstrip())
+                try:
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                except UnicodeDecodeError:
+                    line = raw_line.decode("gbk", errors="replace").rstrip()
+                print(line)
                 if process.poll() is not None and process.stdout.closed:
                     break
         except KeyboardInterrupt:
