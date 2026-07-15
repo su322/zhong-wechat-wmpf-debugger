@@ -1,15 +1,8 @@
 from argparse import RawTextHelpFormatter
 import argparse
-import hashlib
-from pathlib import Path
 
 from utils.colors import Color
 from utils.commons import Commons
-
-
-_BANNER_FILE = Path(__file__).resolve().parent / "utils" / "banner.py"
-_EXPECTED_BANNER_FILE_HASH = "d4701d951f9cfdcf78c0744c081df2b72adca1346a2ad7740eba76ce82c4eafa"
-_BANNER_STOP_MESSAGE = "[-] Banner信息不允许修改，已停止运行"
 
 
 def build_parser():
@@ -38,21 +31,6 @@ def print_colored_message(message, color):
     print(color + message + Color.END)
 
 
-def banner_file_is_valid():
-    content = _BANNER_FILE.read_bytes().replace(b"\r\n", b"\n")
-    return hashlib.sha256(content).hexdigest() == _EXPECTED_BANNER_FILE_HASH
-
-
-def load_banner_generator():
-    if not banner_file_is_valid():
-        print_colored_message(_BANNER_STOP_MESSAGE, Color.RED)
-        raise SystemExit(1)
-
-    from utils.banner import generate_banner
-
-    return generate_banner
-
-
 def main(args=None):
     parser, help_text = build_parser()
     if args is None:
@@ -74,7 +52,4 @@ if __name__ == "__main__":
     parser, _ = build_parser()
     parsed_args = parser.parse_args()
     commons = Commons()
-    if not parsed_args.check:
-        generate_banner = load_banner_generator()
-        generate_banner()
     main(parsed_args)
