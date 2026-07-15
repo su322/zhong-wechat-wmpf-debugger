@@ -26,6 +26,8 @@ python main.py --check
 python main.py -x
 ```
 
+执行完 `python main.py -x` 后，在微信中打开一个小程序，然后访问终端输出的 DevTools URL 即可调试。
+
 ## 系统要求
 
 - **Windows** 10/11 (x64)
