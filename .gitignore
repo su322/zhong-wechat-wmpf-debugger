@@ -16,6 +16,9 @@ htmlcov/
 *.out
 *.err
 WeChatWin_*.exe
+vendor/*/node_modules/
+*.node
+error.md
 
 # 内部工作笔记 / 交接文档 —— 含对话记录、排查细节，禁止推到公开仓库
 PROJECT_CONTEXT.md
